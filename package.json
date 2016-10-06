@@ -1,0 +1,28 @@
+{
+  "name": "auth-service",
+  "version": "0.0.1",
+  "description": "Servicio de authenticacion",
+  "main": "service.js",
+  "scripts": {
+    "start": "SET NODE_ENV=dev&& nodemon service.js",
+    "test": "mocha --timeout 10000"
+  },
+  "keywords": [
+    "authentication",
+    "service"
+  ],
+  "author": "Lucero Sergio Alejandro",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.0.2"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "config": "^1.21.0",
+    "express": "^4.14.0",
+    "mongoose": "^4.6.0",
+    "morgan": "^1.7.0"
+  }
+}
