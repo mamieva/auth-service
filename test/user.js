@@ -221,6 +221,8 @@ describe('Conjunto de pruebas de usuarios', () => {
 					status: 'ACTIVO'
 				})
 				.end((error, response) => {
+          // console.log('STATUS: ', response.status);
+          // console.log('RESPONSE: ', response.body);
 					response.should.have.status(200)
 					response.body.should.be.a('object')
 					response.body.should.have.property('message')
@@ -417,7 +419,7 @@ describe('Conjunto de pruebas de usuarios', () => {
       .post('/user/' + user._id + '/role')
       .send({roleId: '58b9a7b446c74f540ce99cad'})
       .end((error, response) => {
-          response.should.be.status(422)
+          response.should.have.status(422)
           response.body.should.be.a('object')
           response.body.should.have.property('message')
             .eql('El rol, no es un rol valido')
@@ -444,7 +446,7 @@ describe('Conjunto de pruebas de usuarios', () => {
       .post('/user/' + user._id + '/role')
       .send({roleId: ''})
       .end((error, response) => {
-        response.should.be.status(422)
+        response.should.have.status(422)
         response.body.should.be.a('object')
         response.body.should.have.property('message')
           .eql('El rol, no es un rol valido')
@@ -472,12 +474,33 @@ describe('Conjunto de pruebas de usuarios', () => {
       .post('/user/' + user._id + '/role')
       .send({roleId: role._id})
       .end((error, response) => {
-        response.should.be.status(422)
+        response.should.have.status(422)
         response.body.should.be.a('object')
         response.body.should.have.property('message')
           .eql('El rol ya se encuentra asociado al usuario')
         done()
       })
+    })
+  })
+
+  describe('GET /user/:userId/roles', ()=>{
+    it('should get all the roles from a user', done => {
+      let user = new User({
+        username: 'admin@mail.com',
+        password: 'admin',
+        status: 'ACTIVO'
+      })
+      user.save()
+
+      chai.request(service)
+        .get('/user/'+ user._id +'/roles')
+        .end((error, response) => {
+          // console.log('RESPUESTA: ', response.body);
+          response.should.have.status(200)
+          response.body.should.be.a('array')
+          response.body.length.should.be.eql(0)
+          done()
+        })
     })
   })
 })

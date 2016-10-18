@@ -1,6 +1,6 @@
 "use strict";
-const User = require('../models/user')
 const Role = require('../models/role')
+const User = require('../models/user')
 	// Get all the Users
 function getUsers(request, response) {
 	User.find({})
@@ -122,57 +122,103 @@ function findRole(roleId) {
 }
 
 function addRole(request, response) {
-  function respondOk(message) {
-    response.json({message: 'El rol se añadio con exito'})
-    response.end()
-  }
+	function respondOk(message) {
+		response.json({ message: 'El rol se añadio con exito' })
+		response.end()
+	}
 
-  function handleError(error, status, message) {
-    if (error) {
-      response.send(error)
-      response.end()
-    } else {
-      response.status(status).json({ message })
-      response.end()
-    }
-  }
+	function handleError(error, status, message) {
+		if(error) {
+			response.send(error)
+			response.end()
+		} else {
+			response.status(status).json({ message })
+			response.end()
+		}
+	}
 
-  findUser(request.params.userId)
-    .then(user => {
-      if (user) {
-        let roleId = request.body.roleId
-        if (roleId) {
-          findRole(roleId)
-            .then(role => {
-              if (role) {
-                let isIncluded = user.roles
-                  .map(currentRole => currentRole.toString())
-                  .includes(roleId)
+	findUser(request.params.userId)
+		.then(user => {
+			if(user) {
+				let roleId = request.body.roleId
+				if(roleId) {
+					findRole(roleId)
+						.then(role => {
+							if(role) {
+								let isIncluded = user.roles
+									.map(currentRole => currentRole.toString())
+									.includes(roleId)
 
-                  if (isIncluded) {
-                    handleError(null, 422, 'El rol ya se encuentra asociado al usuario')
-                  } else {
-                    user.roles.push(roleId)
-                    user.save()
-                    .then(user => {
-                      respondOk('El rol se añadio con exito')
-                    })
-                    .catch(handleError)
-                  }
-              } else {
-                handleError(null, 422, 'El rol, no es un rol valido')
-              }
-            })
-            .catch(handleError)
-        } else {
-          handleError(null, 422, 'El rol, no es un rol valido')
-        }
-      } else  {
-        handleError(null, 404, 'El usuario, no es un usuario valido')
-      }
-    })
-    .catch(handleError)
+								if(isIncluded) {
+									handleError(null, 422, 'El rol ya se encuentra asociado al usuario')
+								} else {
+									user.roles.push(roleId)
+									user.save()
+										.then(user => {
+											respondOk('El rol se añadio con exito')
+										})
+										.catch(handleError)
+								}
+							} else {
+								handleError(null, 422, 'El rol, no es un rol valido')
+							}
+						})
+						.catch(handleError)
+				} else {
+					handleError(null, 422, 'El rol, no es un rol valido')
+				}
+			} else {
+				handleError(null, 404, 'El usuario, no es un usuario valido')
+			}
+		})
+		.catch(handleError)
+}
 
+function getUserRoles(request, response) {
+	function respondOk(roles) {
+		response.json(roles)
+		response.end()
+	}
+
+	function handleError(error, status, message) {
+		if(error) {
+			response.send(error)
+			response.end()
+		} else {
+			response.status(status).json({ message })
+			response.end()
+		}
+	}
+
+	// findUser(request.params.userId)
+	//   .populate('roles')
+	//   .exec((error, role) => {
+	//     console.log('--ROLE--', role)
+	//   })
+	//   .then(user => {
+	//     if (user) {
+	//       respondOk(user.roles)
+	//     } else {
+	//       handleError(null, 404, 'El usuario no es un usuario valido')
+	//     }
+	//   })
+	//   .catch(handleError)
+
+	findUser(request.params.userId)
+		.then(user => {
+			// console.log('ANTES', user);
+			Role.populate(user, { path: 'roles' })
+				.then(user => {
+					// console.log('++USER++', user)
+					if(user) {
+						respondOk(user.roles)
+					} else {
+						handleError(null, 404, 'El usuario no es un usuario valido')
+					}
+				})
+				.catch(handleError)
+		})
+		.catch(handleError)
 }
 
 module.exports = {
@@ -181,5 +227,6 @@ module.exports = {
 	getUser,
 	updateUser,
 	deleteUser,
-	addRole
+	addRole,
+	getUserRoles
 }

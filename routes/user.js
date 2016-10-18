@@ -19,10 +19,11 @@ router.route('/user/:userId')
 	.put(user.updateUser)
 	.delete(user.deleteUser)
 
-// router.route('/user/:userId/roles')
-//   .get(user.getUserRoles)
-
+router.route('/user/:userId/roles')
+  .get(user.getUserRoles)
+  
 router.route('/user/:userId/role')
 	.post(user.addRole)
+
 
 module.exports = router

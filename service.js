@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const config = require('config')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+const routes = require('./routes/routes')
 
 const port = process.env.REST_PORT || 3000
 	// Database configuration
@@ -33,8 +34,14 @@ const connectionString = `${config.dbhost.url}:${config.dbhost.port}/${config.db
 mongoose.connect(connectionString, options)
 const db = mongoose.connection
 
-db.on('connect', console.log.bind(console, `Conectado a la base de datos en: ${connectionString}`))
-db.on('error', console.log.bind(console, 'Error de conexion: No se pudo conectar a : ${connectionString}'))
+db.on('connect', error => {
+  console.log(`Conectado a la base de datos en: ${connectionString}`)
+})
+
+db.on('error', error => {
+  console.log(`Error de conexion: No se pudo conectar a: ${connectionString}`)
+  // process.exit(1)
+})
 
 // Don't show log when is testing
 // No mostrar la bitacora cuando se hacen las pruebas
@@ -54,14 +61,29 @@ service.use(bodyParser.json({
 		type: 'application/json'
 	}))
 	// Routes
-service.use('/', require('./routes/common'))
-service.use('/', require('./routes/role'))
-service.use('/', require('./routes/profile'))
-service.use('/', require('./routes/user'))
+routes(service)
 
 service.listen(port, function() {
 	console.log('Servicio ejecutandose en el puerto: ' + port);
 })
 
+// process.on('uncaughtException', error => {
+//     console.error('--ERROR--', error);
+//     if (error.syscall !== 'listen')
+//       throw error
+//
+//     switch (error.code) {
+//       case 'EACCESS':
+//         console.error('El puerto ' + port + ' no posee los permisos necesarios')
+//         //process.exit(1)
+//         break
+//       case 'EADDRINUSE':
+//         console.error('El puerto ' + port + ' ya se encuentra en uso')
+//         //process.exit(1)
+//         break
+//       default:
+//         throw error
+//     }
+// })
 // Exporta para ser utilizado en el testing
 module.exports = service
