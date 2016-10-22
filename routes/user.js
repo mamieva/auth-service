@@ -21,9 +21,11 @@ router.route('/user/:userId')
 
 router.route('/user/:userId/roles')
   .get(user.getUserRoles)
-  
-router.route('/user/:userId/role')
-	.post(user.addRole)
 
+router.route('/user/:userId/role')
+	.post(user.addUserRole)
+
+router.route('/user/:userId/role/:roleId')
+  .delete(user.deleteUserRole)
 
 module.exports = router

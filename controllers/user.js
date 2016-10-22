@@ -121,7 +121,7 @@ function findRole(roleId) {
 	return Role.findById({ _id: roleId })
 }
 
-function addRole(request, response) {
+function addUserRole(request, response) {
 	function respondOk(message) {
 		response.json({ message: 'El rol se añadio con exito' })
 		response.end()
@@ -190,26 +190,10 @@ function getUserRoles(request, response) {
 		}
 	}
 
-	// findUser(request.params.userId)
-	//   .populate('roles')
-	//   .exec((error, role) => {
-	//     console.log('--ROLE--', role)
-	//   })
-	//   .then(user => {
-	//     if (user) {
-	//       respondOk(user.roles)
-	//     } else {
-	//       handleError(null, 404, 'El usuario no es un usuario valido')
-	//     }
-	//   })
-	//   .catch(handleError)
-
 	findUser(request.params.userId)
 		.then(user => {
-			// console.log('ANTES', user);
 			Role.populate(user, { path: 'roles' })
 				.then(user => {
-					// console.log('++USER++', user)
 					if(user) {
 						respondOk(user.roles)
 					} else {
@@ -221,12 +205,50 @@ function getUserRoles(request, response) {
 		.catch(handleError)
 }
 
+function deleteUserRole(request, response) {
+
+	function respondOk(roles) {
+		response.json(roles)
+		response.end()
+	}
+
+	function handleError(error, status, message) {
+		if(error) {
+			response.send(error)
+			response.end()
+		} else {
+			response.status(status).json({ message })
+			response.end()
+		}
+	}
+
+	findUser(request.params.userId)
+		.then(user => {
+      if (user) {
+        let isIncluded = user.roles.map(currentRole => currentRole.toString()).includes(request.params.roleId)
+
+        if (isIncluded) {
+          user.roles.remove(request.params.roleId)
+          user.save()
+          response.json({ message: 'Rol revocado con exito' })
+          response.end()
+        } else {
+          handleError(null, 404, 'El rol, no es un rol valido')
+        }
+      } else {
+        handleError(null, 404, 'El usuario, no es un usuario valido')
+      }
+		})
+		.catch(handleError)
+}
+
 module.exports = {
 	getUsers,
 	postUser,
 	getUser,
 	updateUser,
 	deleteUser,
-	addRole,
-	getUserRoles
+	addUserRole,
+	getUserRoles,
+	deleteUserRole
 }
