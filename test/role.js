@@ -165,6 +165,9 @@ describe('Role test suite', () => {
 			chai.request(service)
 				.get('/role/' + role._id)
 				.end((error, response) => {
+          console.log('--RESPONSE--', response.statusCode);
+          console.log('--RESPONSE--', response.body);
+          console.log('--RESPONSE--', response.text);
 					response.should.have.status(200)
 					response.body.should.be.a('object')
 					response.body.should.have.property('message')
